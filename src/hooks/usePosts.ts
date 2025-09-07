@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchPosts, fetchPostBySlug, fetchPostsByCategory } from '@/services/posts';
+import { fetchPosts, fetchPostBySlug, fetchPostsByCategory, fetchPostsWithPagination } from '@/services/posts';
 import { FetchPostsParams } from '@/types/posts';
 
 // Query keys
@@ -7,6 +7,7 @@ export const postsKeys = {
   all: ['posts'] as const,
   lists: () => [...postsKeys.all, 'list'] as const,
   list: (params: FetchPostsParams) => [...postsKeys.lists(), params] as const,
+  listWithPagination: (params: FetchPostsParams) => [...postsKeys.lists(), 'pagination', params] as const,
   details: () => [...postsKeys.all, 'detail'] as const,
   detail: (slug: string) => [...postsKeys.details(), slug] as const,
   byCategory: (categoryId: number) => [...postsKeys.all, 'category', categoryId] as const,
@@ -35,6 +36,14 @@ export function usePostsByCategory(categoryId: number, page: number = 1) {
     queryKey: [...postsKeys.byCategory(categoryId), page],
     queryFn: () => fetchPostsByCategory(categoryId, page),
     enabled: !!categoryId,
+  });
+}
+
+// Fetch posts with pagination hook
+export function usePostsWithPagination(params: FetchPostsParams = {}) {
+  return useQuery({
+    queryKey: postsKeys.listWithPagination(params),
+    queryFn: () => fetchPostsWithPagination(params),
   });
 }
 

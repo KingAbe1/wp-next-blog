@@ -1,17 +1,36 @@
-import { fetchPosts } from "@/services/posts";
-import { WordPressPost } from "@/types/wordpress";
-import PostCard from "@/components/PostCard";
+'use client';
 
-export default async function Home() {
-  let posts: WordPressPost[] = [];
-  let error: string | null = null;
+import { useState } from 'react';
+import { usePostsWithPagination } from '@/hooks';
+import HomeContent from "@/components/HomeContent";
 
-  try {
-    posts = await fetchPosts({ per_page: 12, _embed: true });
-  } catch (err) {
-    error = err instanceof Error ? err.message : 'Failed to fetch posts';
-    console.error('Error fetching posts:', err);
-  }
+export default function Home() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+
+  const { 
+    data: postsData, 
+    isLoading, 
+    error 
+  } = usePostsWithPagination({ 
+    per_page: itemsPerPage,
+    page: currentPage,
+    _embed: true 
+  });
+
+  const posts = postsData?.posts || [];
+  const totalPages = postsData?.totalPages || 1;
+  const totalPosts = postsData?.totalPosts || 0;
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   if (error) {
     return (
@@ -58,25 +77,17 @@ export default async function Home() {
           </div>
         </div>
 
-        {posts.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-8">
-              <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">No Content Available</h3>
-            <p className="text-lg text-gray-600 max-w-md mx-auto">
-              There are no blog posts available at the moment. Check back soon for new content.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
+        {/* Posts Content with Search */}
+        <HomeContent 
+          posts={posts} 
+          totalPages={totalPages}
+          totalPosts={totalPosts}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

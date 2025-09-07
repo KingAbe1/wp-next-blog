@@ -5,6 +5,13 @@ import { AuthorData } from '@/types/author';
 import { CategoryData } from '@/types/category';
 import { FetchPostsParams } from '@/types/posts';
 
+export interface PostsResponse {
+  posts: WordPressPost[];
+  totalPages: number;
+  totalPosts: number;
+  currentPage: number;
+}
+
 // Fetch posts from WordPress API
 export async function fetchPosts(params: FetchPostsParams = {}): Promise<WordPressPost[]> {
   const searchParams = new URLSearchParams();
@@ -25,6 +32,48 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<WordPre
   
   // Enrich posts with embedded data
   return enrichPostsWithEmbeddedData(posts);
+}
+
+// Fetch posts with pagination metadata
+export async function fetchPostsWithPagination(params: FetchPostsParams = {}): Promise<PostsResponse> {
+  const searchParams = new URLSearchParams();
+  
+  searchParams.set('per_page', (params.per_page || 10).toString());
+  searchParams.set('page', (params.page || 1).toString());
+  searchParams.set('_embed', 'true');
+  
+  if (params.categories) {
+    searchParams.set('categories', params.categories.toString());
+  }
+  
+  if (params.search) {
+    searchParams.set('search', params.search);
+  }
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/article?${searchParams}`, {
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const posts = await response.json();
+  const totalPosts = parseInt(response.headers.get('X-WP-Total') || '0');
+  const totalPages = parseInt(response.headers.get('X-WP-TotalPages') || '1');
+  const currentPage = params.page || 1;
+
+  // Enrich posts with embedded data
+  const enrichedPosts = await enrichPostsWithEmbeddedData(posts);
+
+  return {
+    posts: enrichedPosts,
+    totalPages,
+    totalPosts,
+    currentPage
+  };
 }
 
 // Fetch a single post by slug
