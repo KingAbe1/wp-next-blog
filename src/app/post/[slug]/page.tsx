@@ -51,11 +51,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Breadcrumb */}
+      {/* Simple Breadcrumb */}
       <nav className="mb-8">
         <ol className="flex items-center space-x-2 text-sm text-gray-500">
           <li>
-            <Link href="/" className="hover:text-blue-600 transition-colors">
+            <Link href="/" className="hover:text-blue-600 font-medium">
               Home
             </Link>
           </li>
@@ -68,7 +68,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
       {/* Featured Image */}
       {featuredImageUrl && (
-        <div className="relative h-64 md:h-96 w-full mb-8 rounded-lg overflow-hidden">
+        <div className="relative h-64 md:h-96 w-full mb-8 rounded-2xl overflow-hidden shadow-lg">
           <Image
             src={featuredImageUrl}
             alt={featuredImageAlt}
@@ -82,12 +82,12 @@ export default async function PostPage({ params }: PostPageProps) {
 
       {/* Post Header */}
       <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-6">
           {categories.map((category) => (
             <Link
               key={category.id}
               href={`/category/${category.slug}`}
-              className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full hover:bg-blue-200 transition-colors"
+              className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full hover:bg-blue-200"
             >
               {category.name}
             </Link>
@@ -98,20 +98,25 @@ export default async function PostPage({ params }: PostPageProps) {
           {stripHtml(post.title.rendered)}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
+        <div className="flex flex-wrap items-center gap-6 text-gray-600">
           {author && (
-            <div className="flex items-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-bold">
+                  {author.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
               <span className="font-medium">By {author.name}</span>
             </div>
           )}
           <time dateTime={post.date} className="flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             {formatDate(post.date)}
           </time>
           <div className="flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {Math.ceil(stripHtml(post.content.rendered).split(' ').length / 200)} min read
@@ -125,7 +130,7 @@ export default async function PostPage({ params }: PostPageProps) {
         dangerouslySetInnerHTML={{ __html: post.content.rendered }}
       />
 
-      {/* Post Footer */}
+      {/* Simple Footer */}
       <footer className="mt-12 pt-8 border-t border-gray-200">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
@@ -135,7 +140,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(stripHtml(post.title.rendered))}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-500 transition-colors"
+                className="text-gray-400 hover:text-blue-500"
                 aria-label="Share on Twitter"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -146,7 +151,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-600 transition-colors"
+                className="text-gray-400 hover:text-blue-600"
                 aria-label="Share on Facebook"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -158,7 +163,7 @@ export default async function PostPage({ params }: PostPageProps) {
           
           <Link
             href="/"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
           >
             ← Back to all posts
           </Link>

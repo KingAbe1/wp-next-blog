@@ -3,6 +3,76 @@ import { WordPressPost, WordPressCategory } from '@/types/wordpress';
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_BASE_URL
 
+// Helper function to enrich posts with embedded data
+async function enrichPostsWithEmbeddedData(posts: WordPressPost[]): Promise<WordPressPost[]> {
+  const enrichedPosts = await Promise.all(
+    posts.map(async (post) => {
+      const embeddedData: {
+        'wp:featuredmedia'?: Array<{ id: number; source_url: string; alt_text: string }>;
+        author?: Array<{ id: number; name: string; slug: string }>;
+        'wp:term'?: Array<Array<{ id: number; name: string; slug: string; taxonomy: string }>>;
+      } = {};
+
+      // Fetch featured media
+      if (post.featured_media) {
+        try {
+          const mediaResponse = await fetch(`${WORDPRESS_API_URL}/media/${post.featured_media}`);
+          if (mediaResponse.ok) {
+            const mediaData = await mediaResponse.json();
+            embeddedData['wp:featuredmedia'] = [{
+              id: mediaData.id,
+              source_url: mediaData.source_url,
+              alt_text: mediaData.alt_text || post.title.rendered
+            }];
+          }
+        } catch (error) {
+          console.warn('Failed to fetch featured media:', error);
+        }
+      }
+
+      // Fetch author data
+      try {
+        const authorResponse = await fetch(`${WORDPRESS_API_URL}/users/${post.author}`);
+        if (authorResponse.ok) {
+          const authorData = await authorResponse.json();
+          embeddedData.author = [{
+            id: authorData.id,
+            name: authorData.name,
+            slug: authorData.slug
+          }];
+        }
+      } catch (error) {
+        console.warn('Failed to fetch author:', error);
+      }
+
+      // Fetch categories
+      if (post.categories && post.categories.length > 0) {
+        try {
+          const categoriesResponse = await fetch(`${WORDPRESS_API_URL}/categories?post=${post.id}`);
+          if (categoriesResponse.ok) {
+            const categoriesData = await categoriesResponse.json();
+            embeddedData['wp:term'] = [categoriesData.map((cat: { id: number; name: string; slug: string }) => ({
+              id: cat.id,
+              name: cat.name,
+              slug: cat.slug,
+              taxonomy: 'category'
+            }))];
+          }
+        } catch (error) {
+          console.warn('Failed to fetch categories:', error);
+        }
+      }
+
+      return {
+        ...post,
+        _embedded: embeddedData
+      };
+    })
+  );
+
+  return enrichedPosts;
+}
+
 // Fetch posts from WordPress API
 export async function fetchPosts(params: {
   per_page?: number;
@@ -16,15 +86,15 @@ export async function fetchPosts(params: {
   }
 
   const searchParams = new URLSearchParams();
-  
+
   searchParams.set('per_page', (params.per_page || 10).toString());
   searchParams.set('page', (params.page || 1).toString());
   searchParams.set('_embed', 'true');
-  
+
   if (params.categories) {
     searchParams.set('categories', params.categories.toString());
   }
-  
+
   if (params.search) {
     searchParams.set('search', params.search);
   }
@@ -32,6 +102,9 @@ export async function fetchPosts(params: {
   try {
     const response = await fetch(`${WORDPRESS_API_URL}/article?${searchParams}`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -43,7 +116,12 @@ export async function fetchPosts(params: {
       throw new Error('WordPress API returned non-JSON response. Please check your WORDPRESS_API_URL.');
     }
 
-    return response.json();
+    const posts = await response.json();
+
+    // Enrich posts with embedded data
+    const enrichedPosts = await enrichPostsWithEmbeddedData(posts);
+
+    return enrichedPosts;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`WordPress API error: ${error.message}`);
@@ -61,6 +139,9 @@ export async function fetchPostBySlug(slug: string): Promise<WordPressPost> {
   try {
     const response = await fetch(`${WORDPRESS_API_URL}/article?slug=${slug}&_embed=true`, {
       next: { revalidate: 3600 },
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -73,12 +154,15 @@ export async function fetchPostBySlug(slug: string): Promise<WordPressPost> {
     }
 
     const posts = await response.json();
-    
+
     if (posts.length === 0) {
       throw new Error('Post not found');
     }
 
-    return posts[0];
+    // Enrich post with embedded data
+    const enrichedPosts = await enrichPostsWithEmbeddedData([posts[0]]);
+
+    return enrichedPosts[0];
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`WordPress API error: ${error.message}`);

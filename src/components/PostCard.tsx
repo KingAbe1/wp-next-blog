@@ -13,6 +13,7 @@ export default function PostCard({ post }: PostCardProps) {
   const categories = getPostCategories(post);
   const author = getPostAuthor(post);
   const excerpt = post.excerpt?.rendered ? stripHtml(post.excerpt.rendered) : '';
+  const readingTime = Math.ceil(stripHtml(post.content.rendered).split(' ').length / 200);
 
   return (
     <article className="group bg-white rounded-3xl shadow-lg border border-gray-100/50 overflow-hidden hover:shadow-2xl hover:border-gray-200/50">
@@ -65,7 +66,7 @@ export default function PostCard({ post }: PostCardProps) {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="ml-1 text-xs font-medium">5 min read</span>
+            <span className="ml-1 text-xs font-medium">{readingTime} min read</span>
           </div>
         </div>
 
