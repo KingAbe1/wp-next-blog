@@ -15,8 +15,8 @@ export default async function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-20">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center">
             {/* Premium Error Header */}
             <div className="mb-12">
@@ -25,85 +25,10 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">Setup Required</h1>
+              <h1 className="text-5xl font-bold text-gray-900 mb-4">Something Went Wrong</h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Your blog is ready, but needs WordPress API configuration to display content.
+                We&apos;re having trouble loading the latest posts. Please try refreshing the page or check back later.
               </p>
-            </div>
-
-            {/* Error Card */}
-            <div className="bg-white rounded-2xl shadow-xl border border-red-100/60 p-8 mb-8 max-w-2xl mx-auto">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">WordPress API Connection Failed</h3>
-                  <p className="text-gray-700 mb-3">
-                    Unable to load posts. Please check your WordPress API configuration.
-                  </p>
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <p className="text-sm font-mono text-red-800">
-                      Error: {error}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Setup Instructions */}
-            <div className="bg-white rounded-2xl shadow-xl border border-blue-100/60 p-8 max-w-3xl mx-auto">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Setup Guide</h2>
-                <p className="text-gray-600">
-                  Follow these steps to connect your WordPress site and start publishing content.
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-blue-600">1</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Create Environment File</h3>
-                    <p className="text-gray-600 text-sm">Create a <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">.env.local</code> file in your project root</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-blue-600">2</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Add WordPress URL</h3>
-                    <p className="text-gray-600 text-sm mb-2">Add your WordPress API URL:</p>
-                    <div className="bg-gray-900 rounded-lg p-3">
-                      <code className="text-green-400 text-sm font-mono">NEXT_PUBLIC_BASE_URL=http://localhost/CMS/wp-json/wp/v2</code>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-blue-600">3</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Restart Server</h3>
-                    <p className="text-gray-600 text-sm">Restart your development server to load the new configuration</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

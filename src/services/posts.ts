@@ -1,31 +1,9 @@
 import { apiRequest } from './api';
 import { WordPressPost } from '@/types/wordpress';
-
-interface MediaData {
-  id: number;
-  source_url: string;
-  alt_text: string;
-}
-
-interface AuthorData {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-interface CategoryData {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface FetchPostsParams {
-  per_page?: number;
-  page?: number;
-  categories?: number;
-  search?: string;
-  _embed?: boolean;
-}
+import { MediaData } from '@/types/media';
+import { AuthorData } from '@/types/author';
+import { CategoryData } from '@/types/category';
+import { FetchPostsParams } from '@/types/posts';
 
 // Fetch posts from WordPress API
 export async function fetchPosts(params: FetchPostsParams = {}): Promise<WordPressPost[]> {
@@ -43,9 +21,7 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<WordPre
     searchParams.set('search', params.search);
   }
 
-  const posts = await apiRequest<WordPressPost[]>(`/article?${searchParams}`, {
-    next: { revalidate: 3600 }, // Cache for 1 hour
-  });
+  const posts = await apiRequest<WordPressPost[]>(`/article?${searchParams}`);
   
   // Enrich posts with embedded data
   return enrichPostsWithEmbeddedData(posts);
@@ -53,9 +29,7 @@ export async function fetchPosts(params: FetchPostsParams = {}): Promise<WordPre
 
 // Fetch a single post by slug
 export async function fetchPostBySlug(slug: string): Promise<WordPressPost> {
-  const posts = await apiRequest<WordPressPost[]>(`/article?slug=${slug}&_embed=true`, {
-    next: { revalidate: 3600 },
-  });
+  const posts = await apiRequest<WordPressPost[]>(`/article?slug=${slug}&_embed=true`);
   
   if (posts.length === 0) {
     throw new Error('Post not found');

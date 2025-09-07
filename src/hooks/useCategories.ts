@@ -14,8 +14,6 @@ export function useCategories() {
   return useQuery({
     queryKey: categoriesKeys.lists(),
     queryFn: fetchCategories,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 }
 
@@ -25,7 +23,5 @@ export function useCategory(slug: string) {
     queryKey: categoriesKeys.detail(slug),
     queryFn: () => fetchCategoryBySlug(slug),
     enabled: !!slug,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
   });
 }

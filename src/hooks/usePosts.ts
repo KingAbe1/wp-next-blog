@@ -1,5 +1,6 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import { fetchPosts, fetchPostBySlug, fetchPostsByCategory, FetchPostsParams } from '@/services/posts';
+import { useQuery } from '@tanstack/react-query';
+import { fetchPosts, fetchPostBySlug, fetchPostsByCategory } from '@/services/posts';
+import { FetchPostsParams } from '@/types/posts';
 
 // Query keys
 export const postsKeys = {
@@ -16,8 +17,6 @@ export function usePosts(params: FetchPostsParams = {}) {
   return useQuery({
     queryKey: postsKeys.list(params),
     queryFn: () => fetchPosts(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -27,8 +26,6 @@ export function usePost(slug: string) {
     queryKey: postsKeys.detail(slug),
     queryFn: () => fetchPostBySlug(slug),
     enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 }
 
@@ -38,23 +35,6 @@ export function usePostsByCategory(categoryId: number, page: number = 1) {
     queryKey: [...postsKeys.byCategory(categoryId), page],
     queryFn: () => fetchPostsByCategory(categoryId, page),
     enabled: !!categoryId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 }
 
-// Infinite posts hook for pagination
-export function useInfinitePosts(params: Omit<FetchPostsParams, 'page'> = {}) {
-  return useInfiniteQuery({
-    queryKey: [...postsKeys.lists(), 'infinite', params],
-    queryFn: ({ pageParam = 1 }) => fetchPosts({ ...params, page: pageParam }),
-    getNextPageParam: (lastPage, allPages) => {
-      // If last page has fewer items than per_page, we've reached the end
-      const perPage = params.per_page || 10;
-      return lastPage.length === perPage ? allPages.length + 1 : undefined;
-    },
-    initialPageParam: 1,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-}
