@@ -12,11 +12,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
   const response = await fetch(url, {
     headers: {
       'Accept': 'application/json',
-      'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400', // 1 hour cache, 24h stale
       ...options.headers,
-    },
-    next: {
-      revalidate: 3600, // 1 hour revalidation for Next.js
     },
     ...options,
   });
