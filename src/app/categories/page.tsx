@@ -1,66 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { fetchCategories, fetchPosts } from '@/lib/wordpress';
-import { WordPressCategory, WordPressPost } from '@/types/wordpress';
+import { useState } from 'react';
+import { useCategories, usePosts } from '@/hooks';
 import PostCard from '@/components/PostCard';
 import Link from 'next/link';
 
 export default function CategoriesPage() {
-    const [categories, setCategories] = useState<WordPressCategory[]>([]);
-    const [posts, setPosts] = useState<WordPressPost[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  
+  // Fetch categories
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  
+  // Fetch posts based on selected categories
+  const { 
+    data: posts = [], 
+    isLoading: postsLoading, 
+    error: postsError 
+  } = usePosts({ 
+    per_page: 12, 
+    categories: selectedCategories[0] 
+  });
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const [categoriesData, postsData] = await Promise.all([
-                    fetchCategories(),
-                    fetchPosts({ per_page: 12 })
-                ]);
-                setCategories(categoriesData);
-                setPosts(postsData);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, []);
-
-    useEffect(() => {
-        const loadFilteredPosts = async () => {
-            if (selectedCategories.length === 0) {
-                try {
-                    const postsData = await fetchPosts({ per_page: 12 });
-                    setPosts(postsData);
-                } catch (err) {
-                    setError(err instanceof Error ? err.message : 'Failed to load posts');
-                }
-                return;
-            }
-
-            try {
-                setLoading(true);
-                const postsData = await fetchPosts({
-                    per_page: 12,
-                    categories: selectedCategories[0]
-                });
-                setPosts(postsData);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load filtered posts');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadFilteredPosts();
-    }, [selectedCategories]);
+  const loading = categoriesLoading || postsLoading;
+  const error = categoriesError || postsError;
 
     const handleCategoryToggle = (categoryId: number) => {
         setSelectedCategories(prev =>
@@ -89,24 +51,24 @@ export default function CategoriesPage() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Content</h1>
-                        <p className="text-gray-600 mb-8">{error}</p>
-                        <Link
-                            href="/"
-                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700"
-                        >
-                            ← Back to Home
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Content</h1>
+            <p className="text-gray-600 mb-8">{error instanceof Error ? error.message : 'An error occurred'}</p>
+            <Link
+              href="/"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700"
+            >
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">

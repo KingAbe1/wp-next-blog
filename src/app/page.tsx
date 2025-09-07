@@ -1,4 +1,4 @@
-import { fetchPosts } from "@/lib/wordpress";
+import { fetchPosts } from "@/services/posts";
 import { WordPressPost } from "@/types/wordpress";
 import PostCard from "@/components/PostCard";
 
