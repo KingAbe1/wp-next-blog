@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchCategories } from "@/lib/wordpress";
-import { WordPressCategory } from "@/types/wordpress";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,26 +19,17 @@ export const metadata: Metadata = {
   description: "A modern blog powered by Next.js and WordPress API",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch categories for navigation
-  let categories: WordPressCategory[] = [];
-  try {
-    categories = await fetchCategories();
-  } catch (error) {
-    // Silently fail for categories - the app will still work without navigation
-    console.warn('Categories not available:', error instanceof Error ? error.message : 'Unknown error');
-  }
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
-        <Header categories={categories} />
+        <Header />
         <main className="min-h-screen">
           {children}
         </main>
